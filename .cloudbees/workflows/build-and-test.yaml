@@ -24,7 +24,7 @@ jobs:
         id: jenkins-build
         uses: cloudbees-io/jenkins-run-job@v2
         with:
-          integration-name: shared-demos
+          integration-name: guru_env_se_shared_demo
           job-name: lsa/RetirementProFolder/build/master
           
       - name: Publish Build Evidence
