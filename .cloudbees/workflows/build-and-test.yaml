@@ -25,6 +25,8 @@ jobs:
         uses: cloudbees-io/jenkins-run-job@v2
         with:
           url: https://core.cloudbees.guru/shared-demos
+          username: ${{ secrets.JENKINS_USERNAME }}
+          token: ${{ secrets.JENKINS_TOKEN }}
           job-name: lsa/RetirementProFolder/build/master
           
       - name: Publish Build Evidence
