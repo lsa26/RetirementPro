@@ -13,18 +13,21 @@ permissions:
   id-token: write
 
 jobs:
-  build-and-register:
+  register-jenkins-artifact:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
       
-      - name: Configure Java
-        uses: cloudbees-io/configure-jdk-action@v1
-        with:
-          version: "17"
-          
-      - name: Build and Package
-        run: mvn clean package -DskipTests
+      - name: Wait for Jenkins Build
+        run: |
+          echo "Waiting for Jenkins build to complete..."
+          sleep 90
+      
+      - name: Download Artifact from Jenkins
+        run: |
+          curl -o retirement-api.jar \
+            "https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastSuccessfulBuild/artifact/target/retirement-api-1.0.0-SNAPSHOT.jar"
+          ls -lh retirement-api.jar
         
       - name: Register Build Artifact
         uses: cloudbees-io/register-build-artifact@v1
@@ -32,27 +35,27 @@ jobs:
           name: retirement-api-${{ cloudbees.scm.sha }}
           version: 1.0.0-${{ cloudbees.run_number }}
           type: jar
-          path: target/retirement-api-1.0.0-SNAPSHOT.jar
+          path: retirement-api.jar
           
       - name: Publish Build Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
           content: |
-            ## 🏗️ Build (CloudBees Unify)
+            ## 🏗️ Build Jenkins (CloudBees CI)
+            
+            **Pipeline**: [lsa/RetirementProFolder/build/master](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/)
             
             **Artifact**: retirement-api-1.0.0-SNAPSHOT.jar
             **Version**: 1.0.0-${{ cloudbees.run_number }}
             **Commit**: `${{ cloudbees.scm.sha }}`
             **Branch**: `${{ cloudbees.scm.branch }}`
             
-            **Jenkins Pipeline**: [View Build](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastBuild/)
-            
-            ✅ Build completed in CloudBees Unify
+            ✅ Build completed on Jenkins (Kubernetes)
+            ✅ Artifact downloaded from Jenkins
             ✅ Artifact registered in CloudBees Platform
-            ✅ Jenkins build running in parallel
             
   test-insights:
-    needs: build-and-register
+    needs: register-jenkins-artifact
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
