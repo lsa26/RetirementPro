@@ -30,9 +30,9 @@ jobs:
       - name: Register Build Artifact
         uses: cloudbees-io/register-build-artifact@v2
         with:
-          artifact-name: retirement-pro-${{ cloudbees.scm.sha }}
-          artifact-type: jar
-          artifact-location: target/retirement-api-1.0.0-SNAPSHOT.jar
+          name: retirement-pro-${{ cloudbees.scm.sha }}
+          type: jar
+          location: target/retirement-api-1.0.0-SNAPSHOT.jar
           
       - name: Publish Build Evidence
         uses: cloudbees-io/publish-evidence-item@v1
