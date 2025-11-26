@@ -41,31 +41,4 @@ jobs:
             
             ✅ Build completed on CloudBees CI
             ✅ Artifact archived in Jenkins
-  
-  test-github:
-    needs: build-jenkins
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-        
-      - name: Run GitHub Actions Tests
-        uses: cloudbees-io/ghactions-run-workflow@v2
-        with:
-          workflow-file-name: tests.yml
-          branch-name: master
-          org-name: lsa26
-          repo-name: RetirementPro
-          
-      - name: Publish Test Evidence
-        uses: cloudbees-io/publish-evidence-item@v1
-        with:
-          content: |
-            ## 🧪 Tests (GitHub Actions)
-            
-            **Workflow**: tests.yml
-            **Tests**: JUnit unit tests
-            **Jenkins Output**: ${{ needs.build-jenkins.outputs.jenkins-output }}
-            
-            ✅ Tests executed on GitHub Actions
-            ✅ Results available in CloudBees Platform
-            ✅ Orchestration: Jenkins Build → GitHub Tests
+            ✅ GitHub Actions tests triggered automatically
