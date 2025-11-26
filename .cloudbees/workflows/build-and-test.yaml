@@ -1,0 +1,61 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+
+name: RetirementPro - Build and Test
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  scm-token-own: read
+  id-token: write
+
+jobs:
+  build-jenkins:
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+        
+      - name: Build with Jenkins
+        uses: cloudbees-io/jenkins-run-job@v2
+        with:
+          url: https://core.cloudbees.guru/shared-demos
+          job-name: lsa/RetirementProFolder/build/master
+          
+      - name: Publish Build Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |
+            ## 🏗️ Build Jenkins (CloudBees CI)
+            
+            **Pipeline**: lsa/RetirementProFolder/build/master
+            **Agent**: Kubernetes Pod (Maven 3.9.5 + JDK 17)
+            **Artifact**: retirement-api-1.0.0-SNAPSHOT.jar
+            
+            ✅ Build completed on CloudBees CI
+            ✅ Artifact archived in Jenkins
+  
+  test-github:
+    needs: build-jenkins
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+        
+      - name: Run GitHub Actions Tests
+        uses: cloudbees-io/ghactions-run-workflow@v2
+        with:
+          workflow-file-name: tests.yml
+          
+      - name: Publish Test Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |
+            ## 🧪 Tests (GitHub Actions)
+            
+            **Workflow**: tests.yml
+            **Tests**: JUnit unit tests
+            
+            ✅ Tests executed on GitHub Actions
+            ✅ Results available in CloudBees Platform
