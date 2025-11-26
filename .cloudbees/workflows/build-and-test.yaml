@@ -13,52 +13,25 @@ permissions:
   id-token: write
 
 jobs:
-  jenkins-build-evidence:
+  orchestration:
     steps:
-      - name: Wait for Jenkins Build
-        run: |
-          echo "Waiting for Jenkins build..."
-          sleep 90
-      
-      - name: Download Artifact from Jenkins
-        run: |
-          curl -o retirement-api.jar \
-            "https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastSuccessfulBuild/artifact/target/retirement-api-1.0.0-SNAPSHOT.jar"
-        
-      - name: Register Artifact in Platform
-        uses: cloudbees-io/register-build-artifact@v1
-        with:
-          name: retirement-api-${{ cloudbees.scm.sha }}
-          version: 1.0.0-${{ cloudbees.run_number }}
-          type: jar
-          path: retirement-api.jar
-          
-      - name: Publish Jenkins Build Evidence
+      - name: Publish Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
           content: |
-            ## 🏗️ Build Jenkins (CloudBees CI)
+            ## 🏗️ Build & Test Orchestration
             
-            **Pipeline**: [View on Jenkins](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastBuild/)
+            **Jenkins Build**: [View Pipeline](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/)
             
-            **Artifact**: retirement-api-1.0.0-SNAPSHOT.jar
+            **GitHub Actions Tests**: [View Workflow](https://github.com/lsa26/RetirementPro/actions/workflows/tests.yml)
+            
             **Commit**: `${{ cloudbees.scm.sha }}`
+            **Branch**: `${{ cloudbees.scm.branch }}`
             
-            ✅ Build completed on Jenkins (Kubernetes Pod)
-            ✅ Artifact registered in CloudBees Platform
+            ### Orchestration
+            - ✅ Jenkins: Build + Package (Kubernetes Pod)
+            - ✅ GitHub Actions: Unit Tests (JUnit)
+            - ✅ CloudBees Platform: Evidence & Traceability
             
-  github-tests-evidence:
-    needs: jenkins-build-evidence
-    steps:          
-      - name: Publish GitHub Tests Evidence
-        uses: cloudbees-io/publish-evidence-item@v1
-        with:
-          content: |
-            ## 🧪 Tests (GitHub Actions)
-            
-            **Workflow**: [View on GitHub](https://github.com/lsa26/RetirementPro/actions/workflows/tests.yml)
-            
-            **Test Suite**: JUnit unit tests
-            
-            ✅ Tests executed on GitHub Actions
-            ✅ Results available on GitHub
+            **Artifacts**: Available in Jenkins
+            **Test Results**: Available in GitHub Actions
