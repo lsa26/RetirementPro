@@ -1,7 +1,7 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 
-name: RetirementPro - Build and Test
+name: RetirementPro - Build Evidence
 
 on:
   push:
@@ -13,19 +13,10 @@ permissions:
   id-token: write
 
 jobs:
-  build-jenkins:
-    outputs:
-      jenkins-output: ${{ steps.jenkins-build.outputs.jenkins_output }}
+  build-evidence:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-        
-      - name: Build with Jenkins
-        id: jenkins-build
-        uses: cloudbees-io/jenkins-run-job@v2
-        with:
-          integration-name: guru_env_se_shared_demo
-          job-name: lsa/RetirementProFolder/build/master
           
       - name: Publish Build Evidence
         uses: cloudbees-io/publish-evidence-item@v1
@@ -34,11 +25,16 @@ jobs:
             ## 🏗️ Build Jenkins (CloudBees CI)
             
             **Pipeline**: lsa/RetirementProFolder/build/master
-            **Jenkins Output**: ${{ steps.jenkins-build.outputs.jenkins_output }}
+            **Controller**: https://core.cloudbees.guru/shared-demos
             **Agent**: Kubernetes Pod (Maven 3.9.5 + JDK 17)
             **Commit**: ${{ cloudbees.scm.sha }}
             **Branch**: ${{ cloudbees.scm.branch }}
             
-            ✅ Build completed on CloudBees CI
+            ✅ Build triggered automatically via GitHub webhook
             ✅ Artifact archived in Jenkins
-            ✅ GitHub Actions tests triggered automatically
+            ✅ GitHub Actions tests running in parallel
+            
+            **Orchestration**: 
+            - Jenkins build via webhook
+            - GitHub Actions tests via push trigger
+            - Evidence centralized in CloudBees Platform
