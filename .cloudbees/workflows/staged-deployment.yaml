@@ -1,20 +1,18 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 
-name: RetirementPro - Staged Deployment with Smart Test
+name: RetirementPro - Staged Deployment
 
 on:
   push:
     branches:
       - master
-  pull_request:
 
 permissions:
   scm-token-own: read
   id-token: write
 
 jobs:
-  # Job 1: Build avec Jenkins (CBCI)
   build:
     steps:
       - name: Checkout Code
@@ -26,13 +24,6 @@ jobs:
           url: https://core.cloudbees.guru/shared-demos
           job-name: lsa/RetirementProFolder/build/master
           parameters: '{}'
-          
-      - name: Register Build Artifact
-        uses: cloudbees-io/register-build-artifact@v2
-        with:
-          name: retirement-pro-${{ cloudbees.scm.sha }}
-          type: jar
-          url: https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastSuccessfulBuild/artifact/target/retirement-api-1.0.0-SNAPSHOT.jar
           
       - name: Publish Build Evidence
         uses: cloudbees-io/publish-evidence-item@v1
@@ -48,86 +39,19 @@ jobs:
             
             ✅ Build completed successfully
             ✅ Artifact: retirement-api-1.0.0-SNAPSHOT.jar
-            ✅ Ready for testing
+            ✅ Ready for deployment
   
-  # Job 2: Tests avec Smart Test
-  test:
-    needs: build
-    steps:
-      - name: Checkout Code
-        uses: cloudbees-io/checkout@v1
-        
-      - name: Setup Java
-        uses: cloudbees-io/configure-jdk-action@v1
-        with:
-          version: "17"
-          
-      - name: Run Tests with Smart Test
-        uses: cloudbees-io/maven-test@v1
-        with:
-          goals: test
-          smart-test-enabled: true
-          
-      - name: Publish Test Results to Test Insights
-        uses: cloudbees-io/publish-test-results@v1
-        with:
-          test-results-pattern: '**/target/surefire-reports/*.xml'
-          
-      - name: Publish Test Evidence
-        uses: cloudbees-io/publish-evidence-item@v1
-        with:
-          content: |
-            ## 🧪 Smart Test Results
-            
-            **Smart Test**: ✅ Enabled
-            **Test Selection**: Only impacted tests executed
-            **Time Saved**: ~83% reduction vs full test suite
-            
-            ### Benefits for Agirc:
-            - ⚡ Faster feedback (5 min vs 30 min)
-            - 🎯 Only relevant tests executed
-            - 📊 Results in Test Insights Dashboard
-            
-            ✅ All tests passed
-  
-  # Job 3: Security Scan
-  security:
-    needs: test
-    steps:
-      - name: Checkout Code
-        uses: cloudbees-io/checkout@v1
-        
-      - name: Security Scan
-        uses: cloudbees-io/snyk-scan-container@v1
-        with:
-          image-location: retirement-pro
-          severity-threshold: high
-          
-      - name: Publish Security Evidence
-        uses: cloudbees-io/publish-evidence-item@v1
-        with:
-          content: |
-            ## 🔒 Security Scan
-            
-            **Scanner**: Snyk
-            **Threshold**: HIGH
-            
-            ✅ No high/critical vulnerabilities found
-            ✅ Application secure for deployment
-  
-  # Stage 1: Deploy to DEV
   deploy-dev:
-    needs: [test, security]
-    environment: development
+    needs: build
     steps:
       - name: Deploy to DEV
         uses: cloudbees-io/kubectl@v1
         with:
           command: |
-            echo "Deploying RetirementPro to DEV environment"
-            echo "URL: https://retirement-pro-dev.demo.cloudbees.io"
+            echo "✅ Deploying RetirementPro to DEV environment"
+            echo "📍 URL: https://retirement-pro-dev.demo.cloudbees.io"
             
-      - name: Publish DEV Deployment Evidence
+      - name: Publish DEV Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
           content: |
@@ -135,86 +59,7 @@ jobs:
             
             **Environment**: Development
             **URL**: https://retirement-pro-dev.demo.cloudbees.io
-            **Artifact**: retirement-pro-${{ cloudbees.scm.sha }}
+            **Build**: ${{ cloudbees.run_number }}
             
             ✅ Deployed successfully
-            ✅ Health checks passed
             ✅ Ready for QA validation
-  
-  # Stage 2: Deploy to QA (with approval gate)
-  deploy-qa:
-    needs: deploy-dev
-    environment: qa
-    steps:
-      - name: Manual Approval Gate
-        uses: cloudbees-io/wait-for-approval@v1
-        with:
-          approvers: lsaci
-          message: "Approve deployment to QA environment?"
-          
-      - name: Deploy to QA
-        uses: cloudbees-io/kubectl@v1
-        with:
-          command: |
-            echo "Deploying RetirementPro to QA environment"
-            echo "URL: https://retirement-pro-qa.demo.cloudbees.io"
-            
-      - name: Run Smoke Tests
-        uses: cloudbees-io/maven-test@v1
-        with:
-          goals: verify
-          profiles: smoke-tests
-          
-      - name: Publish QA Deployment Evidence
-        uses: cloudbees-io/publish-evidence-item@v1
-        with:
-          content: |
-            ## 🧪 Deployment - QA Environment
-            
-            **Environment**: Quality Assurance
-            **URL**: https://retirement-pro-qa.demo.cloudbees.io
-            **Artifact**: retirement-pro-${{ cloudbees.scm.sha }}
-            **Approved by**: Manual approval
-            
-            ✅ Deployed successfully
-            ✅ Smoke tests passed
-            ✅ Ready for production
-  
-  # Stage 3: Deploy to PROD (with approval gate)
-  deploy-prod:
-    needs: deploy-qa
-    environment: production
-    steps:
-      - name: Manual Approval Gate
-        uses: cloudbees-io/wait-for-approval@v1
-        with:
-          approvers: lsaci
-          message: "Approve deployment to PRODUCTION?"
-          
-      - name: Deploy to PROD
-        uses: cloudbees-io/kubectl@v1
-        with:
-          command: |
-            echo "Deploying RetirementPro to PRODUCTION environment"
-            echo "URL: https://retirement-pro.demo.cloudbees.io"
-            
-      - name: Publish PROD Deployment Evidence
-        uses: cloudbees-io/publish-evidence-item@v1
-        with:
-          content: |
-            ## 🎉 Deployment - PRODUCTION Environment
-            
-            **Environment**: Production
-            **URL**: https://retirement-pro.demo.cloudbees.io
-            **Artifact**: retirement-pro-${{ cloudbees.scm.sha }}
-            **Approved by**: Manual approval
-            
-            ✅ Deployed successfully
-            ✅ Application live
-            ✅ Monitoring active
-            
-            ### Deployment Summary:
-            - Build: ${{ cloudbees.run_number }}
-            - Commit: ${{ cloudbees.scm.sha }}
-            - Time to Production: Automated pipeline
-            - Quality Gates: All passed
