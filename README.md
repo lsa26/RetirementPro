@@ -1,6 +1,6 @@
 # RetirementPro API
 
-Retirement benefits management platform - Demo application for CloudBees Unify.
+Retirement benefits management platform - CloudBees Unify demonstration.
 
 ## Features
 
