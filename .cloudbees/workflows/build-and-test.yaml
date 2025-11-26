@@ -1,7 +1,7 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 
-name: RetirementPro - Build and Test
+name: RetirementPro - Orchestration
 
 on:
   push:
@@ -13,23 +13,19 @@ permissions:
   id-token: write
 
 jobs:
-  register-jenkins-artifact:
+  jenkins-build-evidence:
     steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-      
       - name: Wait for Jenkins Build
         run: |
-          echo "Waiting for Jenkins build to complete..."
+          echo "Waiting for Jenkins build..."
           sleep 90
       
       - name: Download Artifact from Jenkins
         run: |
           curl -o retirement-api.jar \
             "https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastSuccessfulBuild/artifact/target/retirement-api-1.0.0-SNAPSHOT.jar"
-          ls -lh retirement-api.jar
         
-      - name: Register Build Artifact
+      - name: Register Artifact in Platform
         uses: cloudbees-io/register-build-artifact@v1
         with:
           name: retirement-api-${{ cloudbees.scm.sha }}
@@ -37,53 +33,32 @@ jobs:
           type: jar
           path: retirement-api.jar
           
-      - name: Publish Build Evidence
+      - name: Publish Jenkins Build Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
           content: |
             ## 🏗️ Build Jenkins (CloudBees CI)
             
-            **Pipeline**: [lsa/RetirementProFolder/build/master](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/)
+            **Pipeline**: [View on Jenkins](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastBuild/)
             
             **Artifact**: retirement-api-1.0.0-SNAPSHOT.jar
-            **Version**: 1.0.0-${{ cloudbees.run_number }}
             **Commit**: `${{ cloudbees.scm.sha }}`
-            **Branch**: `${{ cloudbees.scm.branch }}`
             
-            ✅ Build completed on Jenkins (Kubernetes)
-            ✅ Artifact downloaded from Jenkins
+            ✅ Build completed on Jenkins (Kubernetes Pod)
             ✅ Artifact registered in CloudBees Platform
             
-  test-insights:
-    needs: register-jenkins-artifact
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-        
-      - name: Configure Java
-        uses: cloudbees-io/configure-jdk-action@v1
-        with:
-          version: "17"
-          
-      - name: Run Tests
-        run: mvn test
-        
-      - name: Publish Test Results to Test Insights
-        uses: cloudbees-io/test-reporting@v1
-        with:
-          test-type: JUnit
-          test-results-location: '**/target/surefire-reports/*.xml'
-          
-      - name: Publish Test Evidence
+  github-tests-evidence:
+    needs: jenkins-build-evidence
+    steps:          
+      - name: Publish GitHub Tests Evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
           content: |
-            ## 🧪 Test Results
+            ## 🧪 Tests (GitHub Actions)
+            
+            **Workflow**: [View on GitHub](https://github.com/lsa26/RetirementPro/actions/workflows/tests.yml)
             
             **Test Suite**: JUnit unit tests
-            **Framework**: JUnit 5 + Mockito
-            **Tests**: BeneficiaryServiceTest
             
-            ✅ Tests executed in CloudBees Unify
-            ✅ Results published to Test Insights
-            ✅ Available in Test Results tab
+            ✅ Tests executed on GitHub Actions
+            ✅ Results available on GitHub
