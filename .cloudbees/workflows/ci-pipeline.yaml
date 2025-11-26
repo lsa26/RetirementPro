@@ -20,7 +20,7 @@ jobs:
         uses: cloudbees-io/jenkins-run-job@v2
         with:
           url: https://core.cloudbees.guru/shared-demos
-          job-name: lsa/RetirementPro/master
+          job-name: lsa/RetirementProFolder/build/master
           parameters: '{}'
           
       - name: Register Build Artifact
@@ -34,15 +34,17 @@ jobs:
         uses: cloudbees-io/publish-evidence-item@v1
         with:
           content: |
-            ## 🏗️ Build Jenkins
+            ## 🏗️ Build Jenkins (Kubernetes)
             
             **Application**: RetirementPro
             **Build**: ${{ cloudbees.run_number }}
             **Commit**: ${{ cloudbees.scm.sha }}
             **Branch**: ${{ cloudbees.scm.branch }}
+            **Agent**: Kubernetes Pod (Maven 3.9.5 + JDK 17)
             
             ✅ Build completed successfully
             ✅ Artifact registered in CloudBees Platform
+            ✅ Tests executed with JUnit
             
   test-analysis:
     needs: build-jenkins
@@ -68,6 +70,8 @@ jobs:
             
             **Test Results**: Published to Test Insights
             **Smart Test**: Sélection intelligente des tests
+            **Coverage**: Tests unitaires JUnit/Mockito
             
             ✅ Tests unitaires passés
             ✅ Résultats disponibles dans Analytics
+            ✅ Kubernetes agents utilisés pour scalabilité
