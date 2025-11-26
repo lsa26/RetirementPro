@@ -47,6 +47,7 @@ jobs:
         uses: cloudbees-io/ghactions-run-workflow@v2
         with:
           workflow-file-name: tests.yml
+          branch-name: master
           
       - name: Publish Test Evidence
         uses: cloudbees-io/publish-evidence-item@v1
