@@ -1,7 +1,7 @@
 # 🎬 Guide de Démo RetirementPro - CloudBees Unify
 
 ## 🎯 Objectif
-Démontrer comment CloudBees Unify adresse les 4 axes d'amélioration de l'Agirc:
+Démontrer comment CloudBees Unify adresse les défis CI/CD modernes:
 1. ✅ **Réduction time to market** (90% gain)
 2. ✅ **Tests unitaires optimisés** avec Smart Test (83% gain)
 3. ✅ **Revue PR automatique** avec IA (95% gain)
@@ -26,10 +26,10 @@ Démontrer comment CloudBees Unify adresse les 4 axes d'amélioration de l'Agirc
 
 ### 🎯 Introduction (2 min)
 
-**Contexte Agirc**:
-> "Vous avez identifié 4 axes d'amélioration critiques pour votre DSI. Aujourd'hui, je vais vous montrer comment CloudBees Unify adresse chacun de ces axes avec une démo concrète sur une application de gestion de prestations retraite."
+**Contexte**:
+> "Aujourd'hui, je vais vous montrer comment CloudBees Unify transforme votre CI/CD avec une démo concrète sur une application de gestion de prestations retraite."
 
-**Les 4 axes**:
+**Les 4 axes d'amélioration**:
 1. ⏱️ Time to market trop long
 2. 🧪 Tests unitaires non optimisés
 3. 👀 Revue de PR manuelle
@@ -98,7 +98,7 @@ JAR Artifact                Test Results
 
 ### 3️⃣ Axe 1: Réduction Time to Market (5 min)
 
-**Problème Agirc**:
+**Problème commun**:
 > "Actuellement, de la modification du code à la production, combien de temps ça prend? 2-3 heures? Une journée?"
 
 **Démonstration**:
@@ -137,7 +137,7 @@ git push origin master
 
 ### 4️⃣ Axe 2: Smart Test (7 min)
 
-**Problème Agirc**:
+**Problème commun**:
 > "Vous exécutez tous les tests à chaque commit? Combien de temps ça prend? 30 minutes?"
 
 **Solution CloudBees Smart Test**:
@@ -184,7 +184,7 @@ git push origin master
 
 ### 5️⃣ Axe 3: Revue PR avec IA (5 min)
 
-**Problème Agirc**:
+**Problème commun**:
 > "Combien de temps un senior dev passe à reviewer une PR? 1-2 heures?"
 
 **Solution CloudBees IA**:
@@ -234,7 +234,7 @@ git push origin feature/quarterly-benefits
 
 ### 6️⃣ Axe 4: Analytics & Build Time (5 min)
 
-**Problème Agirc**:
+**Problème commun**:
 > "Avez-vous de la visibilité sur vos temps de build? Savez-vous où sont les bottlenecks?"
 
 **Solution CloudBees Analytics**:
@@ -280,7 +280,7 @@ git push origin feature/quarterly-benefits
 
 ### 7️⃣ Evidence & Compliance (3 min)
 
-**Valeur pour Agirc** (secteur réglementé):
+**Valeur pour secteurs réglementés**:
 
 **Montrer Evidence Dashboard**:
 - 📋 Traçabilité complète Build → Test → Deploy
@@ -337,7 +337,7 @@ git push origin feature/quarterly-benefits
 
 ---
 
-## 🎯 Prochaines Étapes pour Agirc
+## 🎯 Prochaines Étapes
 
 ### Phase 1: POC (2 semaines)
 - ✅ Déployer RetirementPro sur votre infra
