@@ -1,0 +1,73 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: workflow
+
+name: RetirementPro CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions:
+  scm-token-own: read
+  id-token: write
+
+jobs:
+  build-jenkins:
+    steps:
+      - name: Trigger Jenkins Build
+        uses: cloudbees-io/jenkins-run-job@v2
+        with:
+          url: https://core.cloudbees.guru/shared-demos
+          job-name: lsa/RetirementPro/master
+          parameters: '{}'
+          
+      - name: Register Build Artifact
+        uses: cloudbees-io/register-build-artifact@v2
+        with:
+          artifact-name: retirement-pro-${{ cloudbees.scm.sha }}
+          artifact-type: jar
+          artifact-location: target/retirement-api-1.0.0-SNAPSHOT.jar
+          
+      - name: Publish Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |
+            ## 🏗️ Build Jenkins
+            
+            **Application**: RetirementPro
+            **Build**: ${{ cloudbees.run_number }}
+            **Commit**: ${{ cloudbees.scm.sha }}
+            **Branch**: ${{ cloudbees.scm.branch }}
+            
+            ✅ Build completed successfully
+            ✅ Artifact registered in CloudBees Platform
+            
+  test-analysis:
+    needs: build-jenkins
+    steps:
+      - name: Checkout Code
+        uses: cloudbees-io/checkout@v1
+        
+      - name: Run Tests with Smart Test
+        uses: cloudbees-io/maven-test@v1
+        with:
+          goals: test
+          
+      - name: Publish Test Results
+        uses: cloudbees-io/publish-test-results@v1
+        with:
+          test-results-pattern: '**/target/surefire-reports/*.xml'
+          
+      - name: Publish Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |
+            ## 🧪 Tests & Smart Test
+            
+            **Test Results**: Published to Test Insights
+            **Smart Test**: Sélection intelligente des tests
+            
+            ✅ Tests unitaires passés
+            ✅ Résultats disponibles dans Analytics
