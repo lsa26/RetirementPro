@@ -14,11 +14,15 @@ permissions:
 
 jobs:
   build-jenkins:
+    outputs:
+      build-number: ${{ steps.jenkins-build.outputs.build_number }}
+      build-url: ${{ steps.jenkins-build.outputs.build_url }}
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
         
       - name: Build with Jenkins
+        id: jenkins-build
         uses: cloudbees-io/jenkins-run-job@v2
         with:
           url: https://core.cloudbees.guru/shared-demos
@@ -31,8 +35,11 @@ jobs:
             ## 🏗️ Build Jenkins (CloudBees CI)
             
             **Pipeline**: lsa/RetirementProFolder/build/master
+            **Build Number**: ${{ steps.jenkins-build.outputs.build_number }}
+            **Build URL**: ${{ steps.jenkins-build.outputs.build_url }}
             **Agent**: Kubernetes Pod (Maven 3.9.5 + JDK 17)
-            **Artifact**: retirement-api-1.0.0-SNAPSHOT.jar
+            **Commit**: ${{ cloudbees.scm.sha }}
+            **Branch**: ${{ cloudbees.scm.branch }}
             
             ✅ Build completed on CloudBees CI
             ✅ Artifact archived in Jenkins
@@ -58,6 +65,8 @@ jobs:
             
             **Workflow**: tests.yml
             **Tests**: JUnit unit tests
+            **Jenkins Build**: ${{ needs.build-jenkins.outputs.build-number }}
             
             ✅ Tests executed on GitHub Actions
             ✅ Results available in CloudBees Platform
+            ✅ Orchestration: Jenkins Build → GitHub Tests
