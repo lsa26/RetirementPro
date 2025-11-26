@@ -1,9 +1,24 @@
 pipeline {
-    agent any
-    
-    tools {
-        maven 'Maven 3.9.5'
-        jdk 'JDK 17'
+    agent {
+        kubernetes {
+            yaml '''
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: maven
+    image: maven:3.9.5-eclipse-temurin-17
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - name: maven-cache
+      mountPath: /root/.m2
+  volumes:
+  - name: maven-cache
+    emptyDir: {}
+'''
+        }
     }
     
     environment {
@@ -20,13 +35,17 @@ pipeline {
         
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                container('maven') {
+                    sh 'mvn clean compile'
+                }
             }
         }
         
         stage('Test') {
             steps {
-                sh 'mvn test'
+                container('maven') {
+                    sh 'mvn test'
+                }
             }
             post {
                 always {
@@ -37,8 +56,10 @@ pipeline {
         
         stage('Package') {
             steps {
-                sh 'mvn package -DskipTests'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                container('maven') {
+                    sh 'mvn package -DskipTests'
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
             }
         }
     }
