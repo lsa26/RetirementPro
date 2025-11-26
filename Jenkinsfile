@@ -41,14 +41,6 @@ spec:
             }
         }
         
-        stage('Test') {
-            steps {
-                container('maven') {
-                    sh 'mvn test'
-                }
-            }
-        }
-        
         stage('Package') {
             steps {
                 container('maven') {
@@ -62,6 +54,8 @@ spec:
     post {
         success {
             echo "${APP_NAME} build completed successfully!"
+            echo "Artifact: target/retirement-api-1.0.0-SNAPSHOT.jar"
+            echo "Build URL: ${BUILD_URL}"
         }
         failure {
             echo "${APP_NAME} build failed!"

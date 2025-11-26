@@ -1,7 +1,7 @@
 apiVersion: automation.cloudbees.io/v1alpha1
 kind: workflow
 
-name: RetirementPro - Build Evidence
+name: RetirementPro - Build and Test
 
 on:
   push:
@@ -24,17 +24,44 @@ jobs:
           content: |
             ## 🏗️ Build Jenkins (CloudBees CI)
             
-            **Pipeline**: lsa/RetirementProFolder/build/master
-            **Controller**: https://core.cloudbees.guru/shared-demos
-            **Agent**: Kubernetes Pod (Maven 3.9.5 + JDK 17)
-            **Commit**: ${{ cloudbees.scm.sha }}
-            **Branch**: ${{ cloudbees.scm.branch }}
+            **Pipeline**: [lsa/RetirementProFolder/build/master](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/)
             
-            ✅ Build triggered automatically via GitHub webhook
-            ✅ Artifact archived in Jenkins
-            ✅ GitHub Actions tests running in parallel
+            **Last Build**: [View Build](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastBuild/)
             
-            **Orchestration**: 
-            - Jenkins build via webhook
-            - GitHub Actions tests via push trigger
-            - Evidence centralized in CloudBees Platform
+            **Artifact**: [retirement-api-1.0.0-SNAPSHOT.jar](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastSuccessfulBuild/artifact/target/retirement-api-1.0.0-SNAPSHOT.jar)
+            
+            **Details**:
+            - Agent: Kubernetes Pod (Maven 3.9.5 + JDK 17)
+            - Commit: `${{ cloudbees.scm.sha }}`
+            - Branch: `${{ cloudbees.scm.branch }}`
+            
+            **Orchestration**:
+            - ✅ Jenkins build (compile + package)
+            - ✅ GitHub Actions tests (JUnit)
+            - ✅ Evidence centralized in CloudBees Platform
+            
+  test-evidence:
+    needs: build-evidence
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+        
+      - name: Publish Test Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |
+            ## 🧪 Tests (GitHub Actions)
+            
+            **Workflow**: [RetirementPro Tests](https://github.com/lsa26/RetirementPro/actions/workflows/tests.yml)
+            
+            **Last Run**: [View Results](https://github.com/lsa26/RetirementPro/actions)
+            
+            **Test Suite**: JUnit unit tests
+            - BeneficiaryServiceTest
+            - Test coverage: Unit tests with Mockito
+            
+            **Status**: Tests triggered automatically on push
+            
+            ✅ Tests executed on GitHub Actions
+            ✅ Results available in GitHub Actions UI
+            ✅ Orchestration: Jenkins (build) → GitHub Actions (tests)
