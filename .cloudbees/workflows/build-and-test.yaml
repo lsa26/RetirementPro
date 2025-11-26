@@ -48,6 +48,7 @@ jobs:
         with:
           workflow-file-name: tests.yml
           branch-name: master
+          org-name: lsa26
           
       - name: Publish Test Evidence
         uses: cloudbees-io/publish-evidence-item@v1
