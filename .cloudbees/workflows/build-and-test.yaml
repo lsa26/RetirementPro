@@ -13,26 +13,10 @@ permissions:
   id-token: write
 
 jobs:
-  build-and-artifact:
+  build-evidence:
     steps:
       - name: Checkout
         uses: cloudbees-io/checkout@v1
-      
-      - name: Wait for Jenkins Build
-        run: |
-          echo "Waiting for Jenkins build to complete..."
-          sleep 60
-          
-      - name: Download Artifact from Jenkins
-        run: |
-          curl -o retirement-api.jar \
-            "https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastSuccessfulBuild/artifact/target/retirement-api-1.0.0-SNAPSHOT.jar"
-          ls -lh retirement-api.jar
-          
-      - name: Register Artifact in Unify
-        uses: cloudbees-io/publish-artifact@v1
-        with:
-          path: retirement-api.jar
           
       - name: Publish Build Evidence
         uses: cloudbees-io/publish-evidence-item@v1
@@ -42,44 +26,16 @@ jobs:
             
             **Pipeline**: [lsa/RetirementProFolder/build/master](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/)
             
-            **Artifact**: retirement-api-1.0.0-SNAPSHOT.jar
+            **Last Build**: [View Build](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastBuild/)
+            
+            **Artifact**: [retirement-api-1.0.0-SNAPSHOT.jar](https://core.cloudbees.guru/shared-demos/job/lsa/job/RetirementProFolder/job/build/job/master/lastSuccessfulBuild/artifact/target/retirement-api-1.0.0-SNAPSHOT.jar)
             
             **Details**:
             - Agent: Kubernetes Pod (Maven 3.9.5 + JDK 17)
             - Commit: `${{ cloudbees.scm.sha }}`
             - Branch: `${{ cloudbees.scm.branch }}`
             
-            ✅ Build completed
-            ✅ Artifact registered in CloudBees Platform
-            
-  test-results:
-    needs: build-and-artifact
-    steps:
-      - name: Checkout
-        uses: cloudbees-io/checkout@v1
-        
-      - name: Setup Java
-        uses: cloudbees-io/configure-jdk-action@v1
-        with:
-          version: "17"
-          
-      - name: Run Tests
-        run: mvn test
-        
-      - name: Publish Test Results
-        uses: cloudbees-io/publish-test-results@v1
-        with:
-          test-results-pattern: '**/target/surefire-reports/*.xml'
-          
-      - name: Publish Test Evidence
-        uses: cloudbees-io/publish-evidence-item@v1
-        with:
-          content: |
-            ## 🧪 Tests Results
-            
-            **Test Suite**: JUnit unit tests
-            **Framework**: JUnit 5 + Mockito
-            
-            ✅ Tests executed
-            ✅ Results published to Test Insights
-            ✅ Available in Test Results tab
+            **Orchestration**:
+            - ✅ Jenkins build (compile + package)
+            - ✅ GitHub Actions tests (JUnit)
+            - ✅ Evidence centralized in CloudBees Platform
