@@ -35,7 +35,39 @@ jobs:
             - Commit: `${{ cloudbees.scm.sha }}`
             - Branch: `${{ cloudbees.scm.branch }}`
             
-            **Orchestration**:
-            - ✅ Jenkins build (compile + package)
-            - ✅ GitHub Actions tests (JUnit)
-            - ✅ Evidence centralized in CloudBees Platform
+            ✅ Build completed on CloudBees CI
+            ✅ Artifact archived in Jenkins
+            
+  test-insights:
+    needs: build-evidence
+    steps:
+      - name: Checkout
+        uses: cloudbees-io/checkout@v1
+        
+      - name: Configure Java
+        uses: cloudbees-io/configure-jdk-action@v1
+        with:
+          version: "17"
+          
+      - name: Run Tests
+        run: mvn test
+        
+      - name: Publish Test Results to Test Insights
+        uses: cloudbees-io/test-reporting@v1
+        with:
+          test-type: JUnit
+          test-results-location: '**/target/surefire-reports/*.xml'
+          
+      - name: Publish Test Evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |
+            ## 🧪 Test Results
+            
+            **Test Suite**: JUnit unit tests
+            **Framework**: JUnit 5 + Mockito
+            **Tests**: BeneficiaryServiceTest
+            
+            ✅ Tests executed in CloudBees Unify
+            ✅ Results published to Test Insights
+            ✅ Available in Test Results tab
